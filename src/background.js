@@ -1,6 +1,6 @@
 'use strict';
 
-import { app, protocol, BrowserWindow, Menu } from 'electron';
+import { app, protocol, BrowserWindow, Menu, dialog, ipcMain } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 // import installExtension, { VUEJS3_DEVTOOLS } from "electron-devtools-installer";
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -78,3 +78,14 @@ if (isDevelopment) {
     });
   }
 }
+
+ipcMain.on('open-directory-dialog', function (event, p) {
+  dialog.showOpenDialog({
+    properties: [p]
+  }).then(result => {
+    if ( result.filePaths[0]){// 如果有选中
+      // 发送选择的对象给子进程
+      event.sender.send('selectedItem', result.filePaths[0]);
+    }
+  });
+});

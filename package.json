@@ -15,6 +15,9 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "element-plus": "^1.0.2-beta.55",
+    "fs-extra": "^10.0.0",
+    "lowdb": "1.0.0",
+    "node-cmd": "^4.0.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
     "vuex": "^4.0.0-0"
