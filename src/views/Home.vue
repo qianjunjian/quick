@@ -10,7 +10,7 @@
     </el-aside>
     <el-main>
       <div class="projects">
-        <el-card v-for="item in projects" :key="item.projectName" class="qd-card" shadow="always" @dblclick="openProject(item)">
+        <el-card v-for="(item, index) in projects" :key="item.projectName" class="qd-card" shadow="always" @dblclick="openProject(item)" @contextmenu="rightClick(index, item)">
           <i class="el-icon-news"></i>
           <div>{{item.projectName}}</div>
         </el-card>
@@ -20,11 +20,12 @@
       </div>
     </el-main>
     <el-drawer
-      title="添加项目"
+      :title="showModalTitle"
       v-model="showAddProjectModal"
+      @close="beforeClose"
       direction="rtl"
       destroy-on-close>
-      <el-form ref="form1" :model="formData" :rules="rules1" label-width="80px">
+      <el-form ref="form1" :model="formData" :rules="rules1" label-width="85px">
         <el-form-item label="项目名称" prop="projectName">
           <el-input v-model="formData.projectName"></el-input>
         </el-form-item>
@@ -34,6 +35,18 @@
               <el-button icon="el-icon-folder-opened" @click="showDialog"></el-button>
             </template>
           </el-input>
+        </el-form-item>
+        <el-form-item label="node版本">
+          <el-input v-model="formData.nodeVersion"></el-input>
+        </el-form-item>
+        <el-form-item label="打包命令">
+          <el-input v-model="formData.buildCmd"></el-input>
+        </el-form-item>
+        <el-form-item label="打包文件夹">
+          <el-input v-model="formData.buildFile"></el-input>
+        </el-form-item>
+        <el-form-item label="247目录">
+          <el-input v-model="formData.remoteUrl"></el-input>
         </el-form-item>
         <div class="center"><el-button type="primary" @click="onSubmit">添加</el-button></div>
       </el-form>
@@ -56,22 +69,53 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import cmd from 'node-cmd';
 import db from '../database/datastore';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, remote } from 'electron';
+import { ElMessageBox, ElMessage, ElLoading } from 'element-plus';
+import process from 'child_process';
+import { upload } from '../node/sftp';
+import path from 'path';
+import fs from 'fs';
+
+const { Menu, MenuItem } = remote;
+const remoteUrlDefault = '/usr/local/nginx/html/test';
+const nodeVersionDefault = '14.16.1';
+const buildCmdDefault = ' npm run build:dll && npm run build';
+const buildFileDefault = 'release';
 
 export default {
   name: 'Home',
   setup() {
     let formData = reactive({
       projectName: '',
-      url: ''
+      url: '',
+      remoteUrl: remoteUrlDefault,
+      nodeVersion: nodeVersionDefault,
+      buildCmd: buildCmdDefault,
+      buildFile: buildFileDefault
     });
     let formMenuData = reactive({
       name: ''
     });
     let showAddProjectModal = ref(false);
+    let showEditProjectModal = ref(false);
+    let editProjectIndex = ref(null);
+    let showModalTitle = computed(() => {
+      return showEditProjectModal.value ? '编辑项目' : '添加项目';
+    });
+    const beforeClose = () => {
+      showAddProjectModal.value = false;
+      showEditProjectModal.value = false;
+      formData.projectName = '';
+      formData.url = '';
+      formData.remoteUrl = remoteUrlDefault;
+      formData.nodeVersion = nodeVersionDefault;
+      formData.buildCmd = buildCmdDefault;
+      formData.buildFile = buildFileDefault;
+      editProjectIndex.value = null;
+    };
     let showAddMenuModal = ref(false);
     const form1 = ref(null);
     const form2 = ref(null);
@@ -89,19 +133,47 @@ export default {
     const onSubmit = () => {
       form1.value.validate((valid) => {
         if (valid) {
-          showAddProjectModal.value = false;
-          db.read();
-          const projectsList = db.get('projectList').value() || [];
-          if (!projectsList[menuIndex.value]) {
-            projectsList[menuIndex.value] = [];
+          if (showEditProjectModal.value) {
+            showAddProjectModal.value = false;
+            showEditProjectModal.value = false;
+            db.read();
+            const projectsList = db.get('projectList').value() || [];
+            if (!projectsList[menuIndex.value]) {
+              projectsList[menuIndex.value] = [];
+            }
+            projects.splice(editProjectIndex.value, 1, {
+              ...formData
+            });
+            projectsList[menuIndex.value].splice(editProjectIndex.value, 1, {
+              ...formData
+            });
+            db.set('projectList', projectsList).write();
+            formData.projectName = '';
+            formData.url = '';
+            formData.remoteUrl = remoteUrlDefault;
+            formData.nodeVersion = nodeVersionDefault;
+            formData.buildCmd = buildCmdDefault;
+            formData.buildFile = buildFileDefault;
+            editProjectIndex.value = null;
+          } else {
+            showAddProjectModal.value = false;
+            db.read();
+            const projectsList = db.get('projectList').value() || [];
+            if (!projectsList[menuIndex.value]) {
+              projectsList[menuIndex.value] = [];
+            }
+            projects.push({
+              ...formData
+            });
+            projectsList[menuIndex.value].push(formData);
+            db.set('projectList', projectsList).write();
+            formData.projectName = '';
+            formData.url = '';
+            formData.remoteUrl = remoteUrlDefault;
+            formData.nodeVersion = nodeVersionDefault;
+            formData.buildCmd = buildCmdDefault;
+            formData.buildFile = buildFileDefault;
           }
-          projects.push({
-            ...formData
-          });
-          projectsList[menuIndex.value].push(formData);
-          db.set('projectList', projectsList).write();
-          formData.projectName = '';
-          formData.url = '';
         } else {
           console.log('error submit!!');
           return false;
@@ -145,11 +217,203 @@ export default {
       cmd.run(`code ${project.url}`);
     };
 
+    const openProjectFolder = project => {
+      cmd.run(`cd /D ${project.url} && explorer .`);
+    };
+
+    const showError = err => {
+      ElMessageBox.alert(err, '提示', {
+        confirmButtonText: '确定',
+        showCancelButton: false,
+        type: 'error'
+      });
+    };
+
+    const showSuccess = msg => {
+      ElMessageBox.alert(msg, '提示', {
+        confirmButtonText: '确定',
+        showCancelButton: false,
+        type: 'success'
+      });
+    };
+
+    const buildProject = (project, callBack) => {
+      if (!project.nodeVersion) {
+        showError('请配置node版本！');
+        return;
+      }
+      if (!project.buildCmd) {
+        showError('请配置打包命令！');
+        return;
+      }
+      if (!project.buildFile) {
+        showError('请配置打包文件夹！');
+        return;
+      }
+      let loadingInstance = ElLoading.service({
+        fullscreen: true,
+        background: 'rgba(0, 0, 0, 0.8)',
+        text: '打包中,请稍等...'
+      });
+      process.exec(`nvm use ${project.nodeVersion}`, function(error) {
+        if (error) {
+          showError(error);
+          loadingInstance.close();
+        } else {
+          if (fs.existsSync(path.join(project.url, project.buildFile))) {
+            process.exec(`rd /s /q ${path.join(project.url, project.buildFile)}`, function(error) {
+              if (error) {
+                showError(error);
+                loadingInstance.close();
+              } else {
+                cmd.run(`cd /D ${project.url} && ${project.buildCmd}`,
+                  function(err){
+                    if (err) {
+                      showError(err);
+                      loadingInstance.close();
+                    } else {
+                      if (callBack) {
+                        callBack(project, loadingInstance);
+                      } else {
+                        showSuccess(`【${project.projectName}】 打包成功！`);
+                        loadingInstance.close();
+                      }
+                    }
+                  }
+                );
+              }
+            });
+          } else {
+            cmd.run(`cd /D ${project.url} && ${project.buildCmd}`,
+              function(err){
+                if (err) {
+                  showError(err);
+                  loadingInstance.close();
+                } else {
+                  if (callBack) {
+                    callBack(project, loadingInstance);
+                  } else {
+                    showSuccess(`【${project.projectName}】 打包成功！`);
+                    loadingInstance.close();
+                  }
+                }
+              }
+            );
+          }
+        }
+      });
+    };
+
     const showDialog = () => {
       ipcRenderer.send('open-directory-dialog', 'openDirectory');
       ipcRenderer.on('selectedItem', (e, path) => {
         formData.url = path;
       });
+    };
+
+    const uploadProject = project => {
+      if (!project.remoteUrl) {
+        showError('请配置上传目录！');
+        return;
+      }
+      if (project.remoteUrl.indexOf('/usr/local/nginx/html')) {
+        showError('上传目录请配置在ngix目录下！【/usr/local/nginx/html/**】');
+        return;
+      }
+      buildProject(project, (project, loadingInstance) => {
+        loadingInstance = ElLoading.service({
+          fullscreen: true,
+          background: 'rgba(0, 0, 0, 0.8)',
+          text: '打包成功。上传中,请稍等...'
+        });
+        upload({
+          localStatic: path.join(project.url, project.buildFile), // 本地文件夹路径
+          remoteStatic: project.remoteUrl,
+          successCallBack: () => {
+            showSuccess(`【${project.projectName}】 上传成功!`);
+            loadingInstance.close();
+          },
+          errorCallBack: err => {
+            showError(err);
+            loadingInstance.close();
+          }
+        });
+      });
+    };
+
+    const rightClick = (index, item) => {
+      const menu = new Menu();
+      menu.append(new MenuItem({
+        label: '打开项目所在目录',
+        click: () => {
+          //
+          openProjectFolder(item);
+        }
+      }));
+      menu.append(new MenuItem({
+        label: '使用vsCode打开',
+        click: () => {
+          //
+          openProject(item);
+        }
+      }));
+      menu.append(new MenuItem({
+        label: '打包',
+        click: () => {
+          //
+          buildProject(item);
+        }
+      }));
+      menu.append(new MenuItem({
+        label: '打包并上传247服务器',
+        click: () => {
+          //
+          uploadProject(item);
+        }
+      }));
+      menu.append(new MenuItem({
+        label: '编辑',
+        click: () => {
+          //
+          db.read();
+          const projectsList = db.get('projectList').value() || [];
+          const prohect = projectsList[menuIndex.value][index];
+          formData.projectName = prohect.projectName;
+          formData.url = prohect.url;
+          formData.remoteUrl = prohect.remoteUrl;
+          formData.nodeVersion = prohect.nodeVersion;
+          formData.buildCmd = prohect.buildCmd;
+          formData.buildFile = prohect.buildFile;
+          showAddProjectModal.value = true;
+          showEditProjectModal.value = true;
+          editProjectIndex.value = index;
+        }
+      }));
+      menu.append(new MenuItem({
+        label: '删除',
+        click: () => {
+          //
+          ElMessageBox.confirm('确定删除?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            db.read();
+            const projectsList = db.get('projectList').value() || [];
+            projectsList[menuIndex.value].splice(index, 1);
+            projects.splice(index, 1);
+            db.set('projectList', projectsList).write();
+            ElMessage.success({
+              message: '删除成功!'
+            });
+          }).catch(() => {
+            ElMessage.info({
+              message: '已取消删除'
+            });
+          });
+        }
+      }));
+      menu.popup(remote.getCurrentWindow());
     };
 
     return {
@@ -167,8 +431,11 @@ export default {
       menuClickHandle,
       openProject,
       showDialog,
+      rightClick,
       form1,
       form2,
+      showModalTitle,
+      beforeClose,
       rules1: {
         projectName: [
           {required: true, message: '请输入项目名称', trigger: 'blur'}
@@ -288,6 +555,11 @@ export default {
 
 .el-form {
   padding: 20px 20px 20px 10px;
+}
+
+.el-card__body {
+  min-height: 1.6px;
+  min-width: 250px;
 }
 
 .add-button:hover {

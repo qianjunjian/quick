@@ -25,7 +25,8 @@ module.exports = {
         },
         // ------- windows 相关配置
         win: {
-          target: ['nsis'] // 打包的目标类型,支持很多类型，具体看文档
+          target: ['nsis'], // 打包的目标类型,支持很多类型，具体看文档
+          requestedExecutionLevel: 'requireAdministrator'
         },
         nsis: {
           'oneClick': false,
