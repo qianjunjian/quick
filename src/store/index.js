@@ -1,8 +1,16 @@
-import { createStore } from 'vuex';
+import {
+	createStore
+} from 'vuex';
 
 export default createStore({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {}
+	state: {
+		leftTabIndex: 1
+	},
+	mutations: {
+		setLeftTabIndex(state, index) {
+			// mutate state
+			state.leftTabIndex = index;
+		}
+	},
+	actions: {}
 });

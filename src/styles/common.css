@@ -102,7 +102,7 @@ body,
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0);
+    background-color: #3c3c3c;
     outline: none;
 }
 
@@ -116,7 +116,7 @@ body,
 }
 
 body {
-    padding: 4px;
+    padding: 0;
     user-select: none;
     outline: none;
 }
