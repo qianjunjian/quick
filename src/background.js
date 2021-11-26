@@ -37,7 +37,8 @@ async function createWindow() {
 			nodeIntegration: true,
 			contextIsolation: false,
 			enableWebSQL: false,
-			nativeWindowOpen: true
+			nativeWindowOpen: true,
+			enableRemoteModule:true
 		}
 	});
 

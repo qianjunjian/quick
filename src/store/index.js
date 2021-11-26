@@ -2,14 +2,30 @@ import {
 	createStore
 } from 'vuex';
 
+const leftBoardwidthBase = 250;
+
 export default createStore({
 	state: {
-		leftTabIndex: 1
+		preLeftTabIndex: 1,
+		leftTabIndex: 1,
+		leftBoardwidth: leftBoardwidthBase
 	},
 	mutations: {
 		setLeftTabIndex(state, index) {
-			// mutate state
 			state.leftTabIndex = index;
+		},
+		hideLeftBoard(state, minWidth) {
+			if (state.leftTabIndex !== 0) {
+				state.preLeftTabIndex = state.leftTabIndex;
+				state.leftBoardwidth = minWidth;
+				state.leftTabIndex = 0;
+			}
+		},
+		showLeftBoard(state) {
+			state.leftTabIndex = state.preLeftTabIndex;
+		},
+		setLeftBoardwidth(state, width) {
+			state.leftBoardwidth = width;
 		}
 	},
 	actions: {}
