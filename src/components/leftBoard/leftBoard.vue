@@ -1,5 +1,6 @@
 <template>
     <div id="left-board" :style="{width: basedWidth + 'px'}" :class="[tabIndex > 0 ? 'show' : 'hide']">
+        <Folders v-if="tabIndex === 1" />
     </div>
     <div
         :class="['resize-line', moving ? 'moving' : '']"
@@ -11,6 +12,7 @@
 import { useStore } from 'vuex';
 import { computed, ref } from 'vue';
 import { remote } from 'electron';
+import Folders from '../folders/folders.vue';
 
 const minWidth = 170;
 const tabWidth = 48;
@@ -18,6 +20,9 @@ const rightMaxWidth = 300;
 
 export default {
     name: 'Left',
+    components: {
+        Folders
+    },
     setup() {
         const store = useStore();
         const tabIndex = computed(() => store.state.leftTabIndex);
