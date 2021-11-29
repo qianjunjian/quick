@@ -71,6 +71,7 @@ export default {
     height: 100%;
     background: #252526;
     position: relative;
+    min-width: 170px;
     max-width: calc(100% - 48px - 300px);
 }
 

@@ -4,7 +4,10 @@
     <div class="body">
       <Left></Left>
       <LeftBoard></LeftBoard>
-      <div class="content"></div>
+      <div class="content">
+        <Tags></Tags>
+        <Content></Content>
+      </div>
     </div>
     <Footer></Footer>
   </div>
@@ -15,13 +18,17 @@ import Header from '../components/header/header.vue';
 import Left from '../components/left/left.vue';
 import LeftBoard from '../components/leftBoard/leftBoard.vue';
 import Footer from '../components/footer/footer.vue';
+import Content from '../components/content/content.vue';
+import Tags from '../components/tags/tags.vue';
 export default {
   name: 'Home',
   components: {
     Header,
     Left,
     Footer,
-    LeftBoard
+    LeftBoard,
+    Content,
+    Tags
   },
   setup() {
   }
@@ -49,6 +56,7 @@ export default {
       flex: 1;
       width: 100%;
       height: 100%;
+      text-align: center;
     }
   }
 }

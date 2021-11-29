@@ -1,99 +1,33 @@
 <template>
     <div id="folders">
-        <div class="title">WORKSPACES</div>
+        <div class="title">WORKSPACES<i>···</i></div>
         <el-collapse accordion>
             <el-collapse-item name="1">
                 <template #title>
                     开发环境
                 </template>
                 <el-scrollbar height="calc(100vh - 94px - 30px * 3)">
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent within interface: all elements should be consistent, such
-                    as: design style, icons and texts, position of elements, etc.
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent within interface: all elements should be consistent, such
-                    as: design style, icons and texts, position of elements, etc.
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent within interface: all elements should be consistent, such
-                    as: design style, icons and texts, position of elements, etc.
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent within interface: all elements should be consistent, such
-                    as: design style, icons and texts, position of elements, etc.
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
-                    <div>
-                    Consistent within interface: all elements should be consistent, such
-                    as: design style, icons and texts, position of elements, etc.
-                    </div>
-                    <div>
-                    Consistent with real life: in line with the process and logic of real
-                    life, and comply with languages and habits that the users are used to;
-                    </div>
+                    <Project></Project>
+                    <Project></Project>
                 </el-scrollbar>
             </el-collapse-item>
             <el-collapse-item name="2">
                 <template #title>
                     生产环境
                 </template>
-                <div>
-                Consistent with real life: in line with the process and logic of real
-                life, and comply with languages and habits that the users are used to;
-                </div>
-                <div>
-                Consistent within interface: all elements should be consistent, such
-                as: design style, icons and texts, position of elements, etc.
-                </div>
+                <el-scrollbar height="calc(100vh - 94px - 30px * 3)">
+                    <Project></Project>
+                    <Project></Project>
+                </el-scrollbar>
             </el-collapse-item>
             <el-collapse-item name="3">
                 <template #title>
-                    生产环境
+                    其他环境
                 </template>
-                <div>
-                Consistent with real life: in line with the process and logic of real
-                life, and comply with languages and habits that the users are used to;
-                </div>
-                <div>
-                Consistent within interface: all elements should be consistent, such
-                as: design style, icons and texts, position of elements, etc.
-                </div>
+                <el-scrollbar height="calc(100vh - 94px - 30px * 3)">
+                    <Project></Project>
+                    <Project></Project>
+                </el-scrollbar>
             </el-collapse-item>
         </el-collapse>
     </div>
@@ -102,9 +36,13 @@
 <script>
 import { useStore } from 'vuex';
 import { computed } from 'vue';
+import Project from '../project/project.vue';
 
 export default {
     name: 'Folders',
+    components: {
+        Project
+    },
     setup() {
         const store = useStore();
         const tabIndex = computed(() => store.state.leftTabIndex);
@@ -132,6 +70,14 @@ export default {
         font-size: 12px;
         color: #bbbbbb;
         padding: 13px;
+        position: relative;
+
+        i {
+            font-size: 20px;
+            position: absolute;
+            right: 20px;
+            top: 7px;
+        }
     }
 
     :deep(.el-collapse) {
