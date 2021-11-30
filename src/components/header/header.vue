@@ -3,7 +3,7 @@
         <div class="logo"></div>
         <div class="header-info">
             <div class="menus">
-                <div class="title-bar no-drag">File</div>
+                <div :class="['title-bar', 'no-drag', showFilesMenusPannel ? 'active' : '']" @click="showFilesMenus">File</div>
             </div>
             <div class="btns">
                 <span class="header-icon el-icon-minus no-drag" @click="minimizeWin"></span>
@@ -11,16 +11,26 @@
                 <span class="header-icon el-icon-close no-drag" @click="closeWin"></span>
             </div>
         </div>
+        <div :class="['menu-info', showFilesMenusPannel ? '' : 'hide']">
+            <div class="menu-item" @click="newWorkspace">new workspace<span>Ctrl+W</span></div>
+            <div class="split-line"></div>
+        </div>
     </div>
 </template>
 
 <script>
 import { ipcRenderer } from 'electron';
 import { onMounted, ref } from 'vue';
+import { ElMessageBox } from 'element-plus';
+import Mousetrap from 'mousetrap';
+import { useStore } from 'vuex';
+
 export default {
     name: 'Home',
     setup() {
         const active = ref(false);
+        const store = useStore();
+        const showFilesMenusPannel = ref(false);
 
         const minimizeWin = () => {
             ipcRenderer.send('window-min');
@@ -31,6 +41,36 @@ export default {
         const closeWin = () => {
             ipcRenderer.send('window-close');
         };
+        const hideMenusHandle = () => {
+            showFilesMenusPannel.value = false;
+        };
+        const showFilesMenus = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (showFilesMenusPannel.value) {
+                // 解绑
+                document.removeEventListener('click', hideMenusHandle);
+            } else {
+                // 绑定
+                document.addEventListener('click', hideMenusHandle);
+            }
+            showFilesMenusPannel.value = !showFilesMenusPannel.value;
+        };
+
+        const newWorkspace = () => {
+            ElMessageBox.prompt('请输入您的工程目录名：', '新建', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                inputPattern: /.{1,12}$/,
+                inputErrorMessage: '请输入1到12位字符'
+            }).then(({ value }) => {
+                store.commit('addWorkspaces', value);
+            }).catch(() => {});
+        };
+
+        Mousetrap.bind('ctrl+w', function() {
+            newWorkspace();
+        });
 
         onMounted(() => {
             ipcRenderer.on('window-focus', () => {
@@ -38,6 +78,7 @@ export default {
             });
             ipcRenderer.on('window-blur', () => {
                 active.value = false;
+                hideMenusHandle();
             });
         });
 
@@ -45,13 +86,19 @@ export default {
             minimizeWin,
             maximizeWin,
             closeWin,
-            active
+            active,
+            showFilesMenus,
+            showFilesMenusPannel,
+            newWorkspace
         };
     }
 };
 </script>
 
 <style scoped lang="less">
+.hide {
+    display: none;
+}
 .no-drag {
     -webkit-app-region: no-drag;
 }
@@ -101,6 +148,10 @@ export default {
         padding: 0 5px;
         text-align: center;
 
+        &.active {
+            background-color: #505050;
+        }
+
         &:hover {
             background-color: #505050;
         }
@@ -119,6 +170,35 @@ export default {
         &.el-icon-close:hover {
             background-color: rgb(214, 20, 37) !important;
         }
+    }
+
+    .menu-info {
+        position: absolute;
+        top: 30px;
+        left: 103px;
+        width: 200px;
+        padding: 0 10px;
+        background-color: #252526;
+        font-size: 14px;
+        min-height: 150px;
+        box-shadow: 0px 1px 3px 1px rgba(0,0,0,50%);
+        .menu-item {
+            height: 40px;
+            line-height: 40px;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0 10px;
+
+            span {
+                float: right;
+            }
+        }
+    }
+
+    .split-line {
+        width: 100%;
+        height: 1px;
+        background: #5c5c5c;
     }
 }
 </style>

@@ -1,30 +1,13 @@
 <template>
     <div id="folders">
         <div class="title">WORKSPACES<i>···</i></div>
-        <el-collapse accordion>
-            <el-collapse-item name="1">
+        <el-collapse accordion v-model="workSpacesActiveIndex" @change="handleChange">
+            <el-collapse-item v-for="item in workSpaces" :key="item.id" :name="item.id">
                 <template #title>
-                    开发环境
+                    {{ item.workName }}
+                    <i class="el-icon-delete" v-show="!item.notDelete && item.id === workSpacesActiveIndex"></i>
                 </template>
-                <el-scrollbar height="calc(100vh - 94px - 30px * 3)">
-                    <Project></Project>
-                    <Project></Project>
-                </el-scrollbar>
-            </el-collapse-item>
-            <el-collapse-item name="2">
-                <template #title>
-                    生产环境
-                </template>
-                <el-scrollbar height="calc(100vh - 94px - 30px * 3)">
-                    <Project></Project>
-                    <Project></Project>
-                </el-scrollbar>
-            </el-collapse-item>
-            <el-collapse-item name="3">
-                <template #title>
-                    其他环境
-                </template>
-                <el-scrollbar height="calc(100vh - 94px - 30px * 3)">
+                <el-scrollbar :height="`calc(100vh - 94px - 30px * ${workSpaces.length})`">
                     <Project></Project>
                     <Project></Project>
                 </el-scrollbar>
@@ -46,16 +29,18 @@ export default {
     setup() {
         const store = useStore();
         const tabIndex = computed(() => store.state.leftTabIndex);
-        const iconSelected = index => {
-            if (index === tabIndex.value) {
-                store.commit('setLeftTabIndex', 0);
-            } else {
-                store.commit('setLeftTabIndex', index);
-            }
+        const workSpaces = computed(() => store.state.workSpaces);
+        const workSpacesActiveIndex = computed(() => store.state.workSpacesActiveIndex);
+
+        const handleChange = val => {
+            store.commit('setWorkSpacesActiveIndex', val);
         };
+
         return {
             tabIndex,
-            iconSelected
+            workSpaces,
+            workSpacesActiveIndex,
+            handleChange
         };
     }
 };

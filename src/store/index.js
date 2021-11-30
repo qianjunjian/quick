@@ -1,6 +1,7 @@
 import {
 	createStore
 } from 'vuex';
+import db from '../database/datastore';
 
 const leftBoardwidthBase = 250;
 
@@ -8,7 +9,9 @@ export default createStore({
 	state: {
 		preLeftTabIndex: 1,
 		leftTabIndex: 1,
-		leftBoardwidth: leftBoardwidthBase
+		leftBoardwidth: leftBoardwidthBase,
+		workSpaces: [],
+		workSpacesActiveIndex: 1
 	},
 	mutations: {
 		setLeftTabIndex(state, index) {
@@ -26,6 +29,24 @@ export default createStore({
 		},
 		setLeftBoardwidth(state, width) {
 			state.leftBoardwidth = width;
+		},
+		setWorkspaces(state, workSpaces) {
+			state.workSpaces = workSpaces;
+			db.set('workSpaces', workSpaces).write();
+		},
+		addWorkspaces(state, value) {
+			const workSpaces = state.workSpaces;
+			workSpaces.push({
+				workName: value,
+				notDelete: false,
+				id: Math.random(),
+				children: []
+			});
+			db.set('workSpaces', workSpaces).write();
+		},
+		setWorkSpacesActiveIndex(state, workSpacesActiveIndex) {
+			state.workSpacesActiveIndex = workSpacesActiveIndex;
+			db.set('workSpacesActiveIndex', workSpacesActiveIndex).write();
 		}
 	},
 	actions: {}

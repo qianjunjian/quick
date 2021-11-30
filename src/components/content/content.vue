@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="body">
-            <el-tabs v-model="activeName" @tab-click="handleClick">
+            <el-tabs>
                 <el-tab-pane label="通知" name="first">User</el-tab-pane>
                 <el-tab-pane label="打包记录" name="second">打包记录</el-tab-pane>
                 <el-tab-pane label="提交记录" name="third">提交记录</el-tab-pane>
