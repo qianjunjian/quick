@@ -39,10 +39,23 @@ export default createStore({
 			workSpaces.push({
 				workName: value,
 				notDelete: false,
+				check: true,
 				id: Math.random(),
 				children: []
 			});
 			db.set('workSpaces', workSpaces).write();
+		},
+		deleteWorkspace(state, value) {
+			const workSpaces = state.workSpaces;
+			state.workSpaces = workSpaces.filter(item => item.id !== value);
+			db.set('workSpaces', state.workSpaces).write();
+		},
+		choseWorkspace(state, value) {
+			const workSpaces = state.workSpaces;
+			const index = workSpaces.findIndex(item => item.id === value);
+			workSpaces[index].check = !workSpaces[index].check;
+			// state.workSpaces = cloneDeep(workSpaces);
+			db.set('workSpaces', state.workSpaces).write();
 		},
 		setWorkSpacesActiveIndex(state, workSpacesActiveIndex) {
 			state.workSpacesActiveIndex = workSpacesActiveIndex;

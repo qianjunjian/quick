@@ -7,12 +7,14 @@ export const initDB = (db, store) => {
         workSpaces.push({
             workName: '开发环境',
             notDelete: true,
+            check: true,
             id: 1,
             children: []
         });
         workSpaces.push({
             workName: '生产环境',
             notDelete: true,
+            check: true,
             id: 2,
             children: []
         });
