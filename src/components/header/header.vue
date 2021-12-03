@@ -181,7 +181,7 @@ export default {
         background-color: #252526;
         font-size: 14px;
         min-height: 150px;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 50%);
+        box-shadow: 0 2px 12px 0 rgba(0,0,0,0.5);
         .menu-item {
             height: 40px;
             line-height: 40px;
