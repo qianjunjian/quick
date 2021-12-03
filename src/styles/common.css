@@ -326,3 +326,49 @@ body {
     width: 13px;
     height: 13px;
 }
+
+.el-dialog {
+    background-color: #353535;
+    border: none;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 50%);
+    color: #cccccc;
+    border-radius: 0;
+}
+
+.el-select__popper.el-popper[role=tooltip] {
+    background-color: #353535;
+    border: none;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 50%);
+    color: #cccccc;
+    border-radius: 0;
+}
+
+.el-select__popper.el-popper[role=tooltip] .el-popper__arrow::before {
+    border: none;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 50%);
+}
+
+.el-dialog__title {
+    color: #cccccc;
+    font-size: 15px;
+    line-height: 1;
+}
+
+.el-dialog__body {
+    color: #cccccc;
+    padding: 15px 20px;
+}
+
+.el-form-item__label, .el-input__inner, .el-textarea__inner, .el-select-dropdown__item {
+    color: #cccccc;
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+    background-color: #505050;
+}
+
+.el-input-group__append, .el-input-group__prepend {
+    background-color: #353535;
+    border: 1px solid #3e3e3e;
+    border-left: 0;
+}

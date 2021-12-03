@@ -2,12 +2,17 @@
     <div id="project">
         <div class="icon"><i class="iconfont icon-React"></i></div>
         <div class="info">
-            <div class="title">理财中心</div>
-            <!-- <div class="body">最近打包时间：2021.11.29</div> -->
-             <div class="body">正在打包：</div>
-            <div class="footer">
-                <el-progress :stroke-width="4" :percentage="50" :indeterminate="true" />
-            </div>
+            <div class="title">{{data.projectName}}</div>
+            <template v-if="data.status === 2">
+                <div class="body">正在打包：</div>
+                <div class="footer">
+                    <el-progress :stroke-width="4" :percentage="50" :indeterminate="true" />
+                </div>
+            </template>
+            <template v-else>
+                <div class="body">温馨提示：请更新代码</div>
+                <div class="footer">2021.11.29</div>
+            </template>
         </div>
     </div>
 </template>
@@ -18,6 +23,9 @@ import { computed } from 'vue';
 
 export default {
     name: 'Project',
+    props: {
+        data: Object
+    },
     setup() {
         const store = useStore();
         const tabIndex = computed(() => store.state.leftTabIndex);

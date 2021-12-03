@@ -11,6 +11,8 @@ export default createStore({
 		leftTabIndex: 1,
 		leftBoardwidth: leftBoardwidthBase,
 		workSpaces: [],
+		showAddProject: false,
+		showAddProjectData: {},
 		workSpacesActiveIndex: 1
 	},
 	mutations: {
@@ -60,6 +62,26 @@ export default createStore({
 		setWorkSpacesActiveIndex(state, workSpacesActiveIndex) {
 			state.workSpacesActiveIndex = workSpacesActiveIndex;
 			db.set('workSpacesActiveIndex', workSpacesActiveIndex).write();
+		},
+		setShowAddProject(state, data) {
+			const { showAddProject, showAddProjectData } = data;
+			state.showAddProject = showAddProject;
+			state.showAddProjectData = showAddProjectData;
+		},
+		modifyProject(state, data) {
+			const workSpaces = state.workSpaces;
+			const index = workSpaces.findIndex(item => item.id === data.parentId);
+			if (data.type === 1) {
+				workSpaces[index].children.push({
+					...data
+				});
+			} else {
+				const children = workSpaces[index].children;
+				const _idx = children.findIndex(item => item.id === data.id);
+				children[_idx] = data;
+			}
+			console.log('>>>>>>>>>>2', index);
+			db.set('workSpaces', workSpaces).write();
 		}
 	},
 	actions: {}
