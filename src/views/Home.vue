@@ -21,8 +21,9 @@ import Footer from '../components/footer/footer.vue';
 import Content from '../components/content/content.vue';
 import Tags from '../components/tags/tags.vue';
 import db from '../database/datastore';
-import { initDB } from '../utils/commonUtils';
+import { initDB, refreshProjectStatus } from '../utils/commonUtils';
 import { useStore } from 'vuex';
+import { onMounted } from 'vue';
 
 export default {
     name: 'Home',
@@ -38,6 +39,13 @@ export default {
         const store = useStore();
         // 初始化db
         initDB(db, store);
+        onMounted(() => {
+            refreshProjectStatus(store.state.workSpaces, store.commit);
+            // 每1分钟刷新下
+            setInterval(() => {
+                refreshProjectStatus(store.state.workSpaces, store.commit);
+            }, 60000);
+        });
     }
 };
 </script>

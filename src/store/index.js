@@ -80,7 +80,6 @@ export default createStore({
 				const _idx = children.findIndex(item => item.id === data.id);
 				children[_idx] = data;
 			}
-			console.log('>>>>>>>>>>2', index);
 			db.set('workSpaces', workSpaces).write();
 		}
 	},

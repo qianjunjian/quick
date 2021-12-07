@@ -21,6 +21,7 @@
                     <template #title>
                         <span class="work-name">{{ item.workName }}</span>
                         <div class="btns">
+                            <i class="title-icon el-icon-refresh" @click="refresh($event)" title="刷新" v-show="item.id === workSpacesActiveIndex"></i>
                             <i class="title-icon el-icon-document-add" @click="addProject($event, item.id)" title="当前文件夹下新增工程" v-show="item.id === workSpacesActiveIndex"></i>
                             <el-popconfirm
                                 title="确定删除?"
@@ -34,7 +35,7 @@
                         </div>
                     </template>
                     <el-scrollbar :height="`calc(100vh - 94px - 30px * ${workSpacesShowCount})`">
-                        <Project v-for="ob in item.children" :key="ob.id" :data="ob"></Project>
+                        <Project v-for="ob in item.children" :key="ob.id" :data="ob" @rightClick="rightClick($event, ob)"></Project>
                     </el-scrollbar>
                 </el-collapse-item>
             </template>
@@ -53,23 +54,23 @@
                 <el-form-item label="项目名称：" :label-width="120">
                     <el-input v-model="form.projectName"></el-input>
                 </el-form-item>
-                <el-form-item label="项目路径:" prop="url" :label-width="120">
+                <el-form-item label="项目路径：" prop="url" :label-width="120">
                     <el-input v-model="form.url" @click="showDialog" readonly>
                         <template #append>
                             <el-button icon="el-icon-folder-opened" @click="showDialog"></el-button>
                         </template>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="node版本" :label-width="120">
+                <el-form-item label="node版本：" :label-width="120">
                     <el-input v-model="form.nodeVersion"></el-input>
                 </el-form-item>
-                <el-form-item label="打包命令" :label-width="120">
+                <el-form-item label="打包命令：" :label-width="120">
                     <el-input v-model="form.buildCmd"></el-input>
                 </el-form-item>
-                <el-form-item label="打包文件夹" :label-width="120">
+                <el-form-item label="打包文件夹：" :label-width="120">
                     <el-input v-model="form.buildFile"></el-input>
                 </el-form-item>
-                <el-form-item label="上传目录" :label-width="120">
+                <el-form-item label="上传目录：" :label-width="120">
                     <el-input v-model="form.remoteUrl"></el-input>
                 </el-form-item>
             </el-form>
@@ -80,6 +81,13 @@
                 </span>
             </template>
         </el-dialog>
+        <ProjectMenu
+            :x="projectMenuData?.x"
+            :y="projectMenuData?.y"
+            :data="projectMenuData?.data"
+            v-show="projectMenuData?.show"
+            @close="closeMenuHandle"
+        ></ProjectMenu>
     </div>
 </template>
 
@@ -87,17 +95,25 @@
 import { useStore } from 'vuex';
 import { computed, reactive, watch, toRefs, ref } from 'vue';
 import Project from '../project/project.vue';
+import ProjectMenu from '../projectMenu/projectMenu.vue';
 import { ipcRenderer } from 'electron';
+import { refreshProjectStatus } from '../../utils/commonUtils';
 
 export default {
     name: 'Folders',
     components: {
-        Project
+        Project,
+        ProjectMenu
     },
     setup() {
         const store = useStore();
         const tabIndex = computed(() => store.state.leftTabIndex);
         const workSpaces = computed(() => store.state.workSpaces);
+        const projectMenuData = reactive({
+            x: 0,
+            y: 0,
+            show: false
+        });
         const form1 = ref(null);
         const showAddProject = computed(() => store.state.showAddProject);
 
@@ -163,10 +179,10 @@ export default {
 
                 data.form.projectName = newValue.projectName ?? '';
                 data.form.url = newValue.url ?? '';
-                data.form.nodeVersion = newValue.nodeVersion ?? '';
-                data.form.buildCmd = newValue.buildCmd ?? '';
-                data.form.buildFile = newValue.buildFile ?? '';
-                data.form.remoteUrl = newValue.remoteUrl ?? '';
+                data.form.nodeVersion = newValue.nodeVersion ?? '14.16.1';
+                data.form.buildCmd = newValue.buildCmd ?? 'npm run build:dll && npm run build';
+                data.form.buildFile = newValue.buildFile ?? 'release';
+                data.form.remoteUrl = newValue.remoteUrl ?? '/usr/local/nginx/html/test';
             }
         });
 
@@ -196,6 +212,29 @@ export default {
             });
         };
 
+        const refresh = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            refreshProjectStatus(store.state.workSpaces, store.commit);
+        };
+
+        const rightClick = (e, ob) => {
+            projectMenuData.x = e.clientX - 48;
+            projectMenuData.y = e.clientY - 30;
+            projectMenuData.show = true;
+            projectMenuData.data = ob;
+            document.addEventListener('mousedown', closeMenuHandle);
+        };
+
+        const closeMenuHandle = e => {
+            e.preventDefault();
+            e.stopPropagation();
+            projectMenuData.x = 0;
+            projectMenuData.y = 0;
+            projectMenuData.show = false;
+            document.removeEventListener('mousedown', closeMenuHandle);
+        };
+
         return {
             tabIndex,
             workSpaces,
@@ -208,7 +247,11 @@ export default {
             showAddProject,
             addHandle,
             closeHandle,
+            closeMenuHandle,
             showDialog,
+            refresh,
+            rightClick,
+            projectMenuData,
             form1,
             rules1: {
                 projectName: [
@@ -265,6 +308,10 @@ export default {
 
             &:hover {
                 background-color: #505050;
+            }
+
+            &:active {
+                background-color: transparent;
             }
         }
     }

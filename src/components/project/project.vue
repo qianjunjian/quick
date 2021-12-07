@@ -1,5 +1,5 @@
 <template>
-    <div id="project">
+    <div id="project" @contextmenu.prevent="$emit('rightClick', $event)">
         <div class="icon"><i class="iconfont icon-React"></i></div>
         <div class="info">
             <div class="title">{{data.projectName}}</div>
@@ -10,8 +10,12 @@
                 </div>
             </template>
             <template v-else>
-                <div class="body">温馨提示：请更新代码</div>
-                <div class="footer">2021.11.29</div>
+                <div class="body status-body">
+                    状态：
+                    <i class="iconfont icon-gantanhao" v-show="data.status_u" title="本地版本低于svn版本"></i>
+                    <i class="iconfont icon-medium" v-show="data.status_m" title="本地代码有改动"></i>
+                    <i class="iconfont icon-duigouxuanzhong" v-show="!data.status_u && !data.status_m" title="代码最新"></i>
+                </div>
             </template>
         </div>
     </div>
@@ -26,9 +30,11 @@ export default {
     props: {
         data: Object
     },
+    emits: ['rightClick'],
     setup() {
         const store = useStore();
         const tabIndex = computed(() => store.state.leftTabIndex);
+
         const iconSelected = index => {
             if (index === tabIndex.value) {
                 store.commit('setLeftTabIndex', 0);
@@ -36,6 +42,7 @@ export default {
                 store.commit('setLeftTabIndex', index);
             }
         };
+
         return {
             tabIndex,
             iconSelected
@@ -62,9 +69,6 @@ export default {
 
     .icon-React {
         color: #5adafd;
-    }
-
-    .iconfont {
         font-size: 50px;
         position: absolute;
         left: 0;
@@ -72,6 +76,33 @@ export default {
         width: 50px;
         height: 50px;
     }
+
+    .status-body {
+        display: flex;
+        align-items: center;
+        line-height: unset !important;
+    }
+
+    .icon-gantanhao {
+        color: red;
+        margin-right: 5px;
+        position: relative;
+        top: 3px;
+    }
+
+    .icon-medium {
+        color: yellow;
+        position: relative;
+        top: 2px;
+        margin-right: 5px;
+    }
+
+    .icon-duigouxuanzhong {
+        color: green;
+        position: relative;
+        top: 2px;
+    }
+
     .info {
         flex: 1;
         width: 0;
