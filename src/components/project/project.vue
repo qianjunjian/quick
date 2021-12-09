@@ -1,12 +1,12 @@
 <template>
     <div id="project" @contextmenu.prevent="$emit('rightClick', $event)">
-        <div class="icon"><i class="iconfont icon-React"></i></div>
+        <div class="icon"><i :class="['iconfont', iconType]"></i></div>
         <div class="info">
             <div class="title">{{data.projectName}}</div>
-            <template v-if="data.status === 2">
+            <template v-if="count > 0">
                 <div class="body">正在打包：</div>
                 <div class="footer">
-                    <el-progress :stroke-width="4" :percentage="50" :indeterminate="true" />
+                    <el-progress :stroke-width="4" :percentage="count" :indeterminate="true" />
                 </div>
             </template>
             <template v-else>
@@ -23,7 +23,7 @@
 
 <script>
 import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { computed, ref, watchEffect, nextTick } from 'vue';
 
 export default {
     name: 'Project',
@@ -31,9 +31,40 @@ export default {
         data: Object
     },
     emits: ['rightClick'],
-    setup() {
+    setup(props) {
         const store = useStore();
+        const count = ref(0);
         const tabIndex = computed(() => store.state.leftTabIndex);
+        let timeout = null;
+        watchEffect(async() => {
+            const status = store.state.building[props.data.id]?.type;
+            if (status === 2) {
+                timeout = setInterval(() => {
+                    if (count.value < 99) {
+                        count.value = count.value + 1;
+                    }
+                }, 300);
+            } else {
+                if (status === 1 && count.value > 0) {
+                    count.value = 100;
+                    timeout && clearInterval(timeout);
+                    await nextTick();
+                    count.value = 0;
+                }
+            }
+        });
+        const iconType = computed(() => {
+            if (props.data.iconType === 'react') {
+                return 'icon-React';
+            }
+            if (props.data.iconType === 'vue') {
+                return 'icon-vue';
+            }
+            if (props.data.iconType === 'backbone') {
+                return 'icon-bold';
+            }
+            return 'icon-React';
+        });
 
         const iconSelected = index => {
             if (index === tabIndex.value) {
@@ -45,7 +76,9 @@ export default {
 
         return {
             tabIndex,
-            iconSelected
+            iconSelected,
+            iconType,
+            count
         };
     }
 };
@@ -67,6 +100,20 @@ export default {
         align-self: center;
     }
 
+    .icon-vue {
+        color: #56b359;
+        font-size: 50px;
+        position: absolute;
+        left: 0;
+        top: -18px;
+        width: 50px;
+        height: 50px;
+
+        &::before {
+            background: #2e3031;
+        }
+    }
+
     .icon-React {
         color: #5adafd;
         font-size: 50px;
@@ -75,6 +122,24 @@ export default {
         top: -18px;
         width: 50px;
         height: 50px;
+
+        &::before {
+            background: #2e3031;
+        }
+    }
+
+    .icon-bold {
+        color: #cc5c0c;
+        font-size: 50px;
+        position: absolute;
+        left: 0;
+        top: -18px;
+        width: 50px;
+        height: 50px;
+
+        &::before {
+            background: #2e3031;
+        }
     }
 
     .status-body {

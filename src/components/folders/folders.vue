@@ -219,6 +219,10 @@ export default {
         };
 
         const rightClick = (e, ob) => {
+            const status = store.state.building[ob.id]?.type;
+            if (status === 2) {
+                return;
+            }
             projectMenuData.x = e.clientX - 48;
             projectMenuData.y = e.clientY - 30;
             projectMenuData.show = true;

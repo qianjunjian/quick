@@ -13,7 +13,8 @@ export default createStore({
 		workSpaces: [],
 		showAddProject: false,
 		showAddProjectData: {},
-		workSpacesActiveIndex: 1
+		workSpacesActiveIndex: 1,
+		building: {}
 	},
 	mutations: {
 		setLeftTabIndex(state, index) {
@@ -43,6 +44,7 @@ export default createStore({
 				notDelete: false,
 				check: true,
 				id: Math.random(),
+				server: '192.168.9.247',
 				children: []
 			});
 			db.set('workSpaces', workSpaces).write();
@@ -56,7 +58,6 @@ export default createStore({
 			const workSpaces = state.workSpaces;
 			const index = workSpaces.findIndex(item => item.id === value);
 			workSpaces[index].check = !workSpaces[index].check;
-			// state.workSpaces = cloneDeep(workSpaces);
 			db.set('workSpaces', state.workSpaces).write();
 		},
 		setWorkSpacesActiveIndex(state, workSpacesActiveIndex) {
@@ -78,9 +79,18 @@ export default createStore({
 			} else {
 				const children = workSpaces[index].children;
 				const _idx = children.findIndex(item => item.id === data.id);
-				children[_idx] = data;
+				children[_idx] = {
+					...children[_idx],
+					...data
+				};
 			}
 			db.set('workSpaces', workSpaces).write();
+		},
+		setBuilding(state, data) {
+			const {id, type} = data;
+			state.building[id] = {
+				type
+			};
 		}
 	},
 	actions: {}

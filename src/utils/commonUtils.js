@@ -33,6 +33,7 @@ export const initDB = (db, store) => {
             notDelete: true,
             check: true,
             id: 1,
+            server: '192.168.9.247',
             children: []
         });
         workSpaces.push({
@@ -40,6 +41,7 @@ export const initDB = (db, store) => {
             notDelete: true,
             check: true,
             id: 2,
+            server: '192.168.9.247',
             children: []
         });
     }

@@ -5,19 +5,26 @@
             <div :class="['common-icon', 'el-icon-search', tabIndex === 2 ? 'active' : '']" @click="() => iconSelected(2)"></div>
         </div>
         <div class="left-bottom">
-            <div class="common-icon el-icon-setting"></div>
+            <div class="common-icon el-icon-setting" @click="menusClick"></div>
+            <div :class="['setting-layout', showMenus ? '' : 'hide']" @click="hideClick">
+                <div class="setting-info">
+                    <div class="menu-item">上传服务器设置</div>
+                    <div class="split-line"></div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 export default {
     name: 'Left',
     setup() {
         const store = useStore();
+        const showMenus = ref(false);
         const tabIndex = computed(() => store.state.leftTabIndex);
         const iconSelected = index => {
             if (index === tabIndex.value) {
@@ -26,9 +33,18 @@ export default {
                 store.commit('setLeftTabIndex', index);
             }
         };
+        const menusClick = () => {
+            showMenus.value = true;
+        };
+        const hideClick = () => {
+            showMenus.value = false;
+        };
         return {
             tabIndex,
-            iconSelected
+            iconSelected,
+            showMenus,
+            menusClick,
+            hideClick
         };
     }
 };
@@ -67,6 +83,51 @@ export default {
                 width: 2px;
                 background: #ffffff;
             }
+        }
+    }
+
+    .setting-layout {
+        position: fixed;
+        background-color: transparent;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        z-index: 100;
+
+        &.hide {
+            display: none;
+        }
+    }
+
+    .setting-info {
+        position: absolute;
+        bottom: 20px;
+        left: 48px;
+        z-index: 101;
+        background-color: #252526;
+        min-width: 200px;
+        min-height: 150px;
+        box-shadow: 0 2px 12px 0 rgba(0,0,0,0.5);
+        color: #cccccc;
+        padding: 10px 0;
+
+        .menu-item {
+            height: 30px;
+            line-height: 30px;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0 30px;
+
+            &:hover {
+                background-color: #094771;
+            }
+        }
+
+        .split-line {
+            height: 1px;
+            background: #5c5c5c;
+            margin: 10px;
         }
     }
 }

@@ -3,16 +3,18 @@
         <div class="menu-item" @click="openFolder($event)">打开项目所在目录</div>
         <div class="menu-item" @click="openWidthVsCode($event)">使用vsCode打开</div>
         <div class="split-line"></div>
-        <div class="menu-item">打包</div>
+        <div class="menu-item" @click="buildHandle">打包</div>
         <div class="menu-item">打包并上传</div>
         <div class="split-line"></div>
-        <div class="menu-item">编辑</div>
+        <div class="menu-item" @click="editHandle">编辑</div>
         <div class="menu-item">删除</div>
     </div>
 </template>
 
 <script>
 import cmd from 'node-cmd';
+import { useStore } from 'vuex';
+import { buildProject } from '../../node/build';
 
 export default {
     name: 'ProjectMenu',
@@ -22,6 +24,7 @@ export default {
         data: Object
     },
     setup(props, context) {
+        const store = useStore();
         const mousedownHandle = e => {
             e.preventDefault();
             e.stopPropagation();
@@ -36,10 +39,28 @@ export default {
             cmd.run(`code ${project.url}`);
             context.emit('close', e);
         };
+        const editHandle = e => {
+            const { data: project } = props;
+            store.commit('setShowAddProject', {
+                showAddProject: true,
+                showAddProjectData: {
+                    ...project,
+                    type: 2
+                }
+            });
+            context.emit('close', e);
+        };
+        const buildHandle = e => {
+             const { data: project } = props;
+            buildProject(project, store);
+            context.emit('close', e);
+        };
         return {
             openFolder,
             openWidthVsCode,
-            mousedownHandle
+            mousedownHandle,
+            editHandle,
+            buildHandle
         };
     }
 };
@@ -48,7 +69,6 @@ export default {
 <style scoped lang="less">
 #projectMenu {
     position: absolute;
-    background: red;
     z-index: 101;
     background-color: #252526;
     min-width: 200px;
