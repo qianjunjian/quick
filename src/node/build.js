@@ -128,30 +128,33 @@ export const buildAndUploadProject = (project, store) => {
       id: project.id,
       type: 3
     });
-    upload({
-      localStatic: path.join(project.url, project.buildFile), // 本地文件夹路径
-      remoteStatic: project.remoteUrl,
-      successCallBack: () => {
-        showSuccess(`【${project.projectName}】 上传成功!`);
-        ElNotification({
-          title: '打包并上传成功',
-          message: `${_time}  ${project.projectName}  打包成功！`,
-          type: 'success',
-          duration: 0,
-          position: 'bottom-right'
-        });
-        store.commit('setBuilding', {
-          id: project.id,
-          type: 1
-        });
-      },
-      errorCallBack: err => {
-        showError(err);
-        store.commit('setBuilding', {
-          id: project.id,
-          type: 1
-        });
-      }
-    });
+    const timeout = setTimeout(() => {
+      upload({
+        localStatic: path.join(project.url, project.buildFile), // 本地文件夹路径
+        remoteStatic: project.remoteUrl,
+        successCallBack: () => {
+          ElNotification({
+            title: '打包并上传成功',
+            message: `${_time}  ${project.projectName}  打包成功！`,
+            type: 'success',
+            duration: 0,
+            position: 'bottom-right'
+          });
+          store.commit('setBuilding', {
+            id: project.id,
+            type: 1
+          });
+          timeout && clearTimeout(timeout);
+        },
+        errorCallBack: err => {
+          showError(err);
+          store.commit('setBuilding', {
+            id: project.id,
+            type: 1
+          });
+          timeout && clearTimeout(timeout);
+        }
+      });
+    }, 100);
   });
 };

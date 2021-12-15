@@ -16,7 +16,7 @@ const config = {
  * @param { String } config.port sftp 端口号
  * @param { String } config.username sftp 用户名
  * @param { String } config.password sftp 密码
- * 
+ *
  * @param { Object } options 配置参数
  * @param { String } localStatic // 本地静态资源文件夹路径
  * @param { String } remoteStatic // 服务器静态资源文件夹路径
@@ -24,7 +24,6 @@ const config = {
  * @param { String } remoteFile // 服务器html页面
  */
 export function upload(options) {
-  console.log(JSON.stringify(options));
   sftp.connect(config).then(() => {
     console.log('文件上传中');
     return sftp.exists(options.remoteStatic + '/app');

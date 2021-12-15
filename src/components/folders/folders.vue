@@ -35,7 +35,7 @@
                         </div>
                     </template>
                     <el-scrollbar :height="`calc(100vh - 94px - 30px * ${workSpacesShowCount})`">
-                        <Project v-for="ob in item.children" :key="ob.id" :data="ob" @rightClick="rightClick($event, ob)"></Project>
+                        <Project v-for="ob in item.children" :key="ob.id" :data="ob" @rightClick="rightClick($event, ob)" @leftClick="leftClick(ob)"></Project>
                     </el-scrollbar>
                 </el-collapse-item>
             </template>
@@ -230,6 +230,12 @@ export default {
             document.addEventListener('mousedown', closeMenuHandle);
         };
 
+        const leftClick = (ob) => {
+            store.commit('setActiveProject', {
+                ...ob
+            });
+        };
+
         const closeMenuHandle = e => {
             e.preventDefault();
             e.stopPropagation();
@@ -255,6 +261,7 @@ export default {
             showDialog,
             refresh,
             rightClick,
+            leftClick,
             projectMenuData,
             form1,
             rules1: {

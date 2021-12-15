@@ -14,7 +14,6 @@
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.6.5",
-    "cpu-features": "^0.0.2",
     "dayjs": "^1.10.7",
     "element-plus": "^1.0.2-beta.55",
     "fs-extra": "^10.0.0",

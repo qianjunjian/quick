@@ -1,14 +1,9 @@
 <template>
     <div id="tags">
-        <div class="tag active">
-            <i class="icon iconfont icon-React"></i>
-            理财中心
-            <i class="close el-icon-close"></i>
-        </div>
-        <div class="tag">
-            <i class="icon iconfont icon-React"></i>
-            公募基金
-            <i class="close el-icon-close"></i>
+        <div :class="['tag', activeProjectId === item.id ? 'active' : ''] " v-for="item in projectHistory" :key="item.id" @click="clickHandle(item)">
+            <i :class="['icon', 'iconfont', item.iconType === 'vue' ? 'icon-vue ' : item.iconType === 'backbone' ? 'icon-bold' : 'icon-React']"></i>
+            {{item.projectName}}
+            <i class="close el-icon-close" @click="deleteHandle($event, item)"></i>
         </div>
     </div>
 </template>
@@ -21,17 +16,25 @@ export default {
     name: 'Tags',
     setup() {
         const store = useStore();
-        const tabIndex = computed(() => store.state.leftTabIndex);
-        const iconSelected = index => {
-            if (index === tabIndex.value) {
-                store.commit('setLeftTabIndex', 0);
-            } else {
-                store.commit('setLeftTabIndex', index);
-            }
+        const projectHistory = computed(() => store.state.projectHistory);
+        const activeProjectId = computed(() => store.state.activeProjectId);
+        const clickHandle = item => {
+            store.commit('setActiveProject', {
+                ...item
+            });
         };
+        const deleteHandle = (e, item) => {
+            e.stopPropagation();
+            store.commit('deleteActiveProject', {
+                id: item.id
+            });
+        };
+
         return {
-            tabIndex,
-            iconSelected
+            clickHandle,
+            projectHistory,
+            activeProjectId,
+            deleteHandle
         };
     }
 };
@@ -50,7 +53,7 @@ export default {
         line-height: 40px;
         font-size: 12px;
         background-color: #2d2d2d;
-        color: #5cc991;
+        color: #cccccc;
         position: relative;
         cursor: pointer;
 
@@ -77,7 +80,7 @@ export default {
 
         &.active {
             background-color: #1e1e1e;
-
+            color: #dab560;
             .close {
                 display: block;
             }
@@ -91,6 +94,15 @@ export default {
 
         .icon-React {
             color: #5adafd;
+        }
+
+        .icon-bold {
+            color: #cc5c0c;
+            top: 2px;
+        }
+
+        .icon-vue {
+            color: #56b359;
         }
     }
 }

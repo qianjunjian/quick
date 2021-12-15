@@ -14,7 +14,9 @@ export default createStore({
 		showAddProject: false,
 		showAddProjectData: {},
 		workSpacesActiveIndex: 1,
-		building: {}
+		building: {},
+		activeProjectId: '',
+		projectHistory: []
 	},
 	mutations: {
 		setLeftTabIndex(state, index) {
@@ -83,6 +85,15 @@ export default createStore({
 					...children[_idx],
 					...data
 				};
+
+				// 更新history堆栈
+				const idx = state.projectHistory.findIndex(item => item.id === data.id);
+				if (idx >= 0) {
+					state.projectHistory[idx] = {
+						...state.projectHistory[idx],
+						...data
+					};
+				}
 			}
 			db.set('workSpaces', workSpaces).write();
 		},
@@ -95,6 +106,44 @@ export default createStore({
 
 			state.workSpaces = workSpaces;
 			db.set('workSpaces', workSpaces).write();
+
+			// 删除history堆栈
+			const idx = state.projectHistory.findIndex(item => item.id === data.id);
+			if (idx >= 0) {
+				state.projectHistory.splice(idx, 1);
+			}
+			if (state.activeProjectId === data.id) {
+				if (state.projectHistory[idx - 1]) {
+					state.activeProjectId = state.projectHistory[idx - 1].id;
+				} else if (state.projectHistory[idx]) {
+					state.activeProjectId = state.projectHistory[idx].id;
+				} else {
+					state.activeProjectId = '';
+				}
+			}
+		},
+		setActiveProject(state, data) {
+			state.activeProjectId = data.id;
+
+			const index = state.projectHistory.findIndex(item => item.id === data.id);
+			if (index < 0) {
+				state.projectHistory.unshift(data);
+			}
+		},
+		deleteActiveProject(state, data) {
+			const index = state.projectHistory.findIndex(item => item.id === data.id);
+			if (index >= 0) {
+				state.projectHistory.splice(index, 1);
+			}
+			if (state.activeProjectId === data.id) {
+				if (state.projectHistory[index - 1]) {
+					state.activeProjectId = state.projectHistory[index - 1].id;
+				} else if (state.projectHistory[index]) {
+					state.activeProjectId = state.projectHistory[index].id;
+				} else {
+					state.activeProjectId = '';
+				}
+			}
 		},
 		setBuilding(state, data) {
 			const {id, type} = data;

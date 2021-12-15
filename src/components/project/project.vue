@@ -1,5 +1,5 @@
 <template>
-    <div id="project" @contextmenu.prevent="$emit('rightClick', $event)">
+    <div id="project" :class="[isActive ? 'active' : '']" @contextmenu.prevent="$emit('rightClick', $event)" @click.left.prevent="$emit('leftClick')">
         <i :class="['iconfont', iconType]"></i>
         <div class="info">
             <div class="title">{{data.projectName}}</div>
@@ -27,12 +27,13 @@ export default {
     props: {
         data: Object
     },
-    emits: ['rightClick'],
+    emits: ['rightClick', 'leftClick'],
     setup(props) {
         const store = useStore();
         const count = ref(0);
         const tabIndex = computed(() => store.state.leftTabIndex);
         const projectStatus = computed(() => store.state.building[props.data.id]?.type);
+        const isActive = computed(() => store.state.activeProjectId === props.data.id);
         let timeout = null;
         watchEffect(async() => {
             const status = store.state.building[props.data.id]?.type;
@@ -44,6 +45,12 @@ export default {
                 }, 300);
             } else if (status === 3) {
                 count.value = 1;
+                timeout && clearInterval(timeout);
+                timeout = setInterval(() => {
+                    if (count.value < 99) {
+                        count.value = count.value + 1;
+                    }
+                }, 25);
             } else {
                 if (status === 1 && count.value > 0) {
                     count.value = 100;
@@ -79,7 +86,8 @@ export default {
             iconSelected,
             iconType,
             count,
-            projectStatus
+            projectStatus,
+            isActive
         };
     }
 };
@@ -157,6 +165,11 @@ export default {
 
     &:hover {
         background-color: #2a2d2e;
+    }
+
+    &.active {
+        background-color: #094771;
+        border: 1px solid #007fd4;
     }
 
     &:active {
