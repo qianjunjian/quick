@@ -86,6 +86,16 @@ export default createStore({
 			}
 			db.set('workSpaces', workSpaces).write();
 		},
+		deleteProject(state, data) {
+			const workSpaces = state.workSpaces;
+			const index = workSpaces.findIndex(item => item.id === data.parentId);
+
+			const _idx = workSpaces[index].children.findIndex(item => item.id === data.id);
+			workSpaces[index].children.splice(_idx, 1);
+
+			state.workSpaces = workSpaces;
+			db.set('workSpaces', workSpaces).write();
+		},
 		setBuilding(state, data) {
 			const {id, type} = data;
 			state.building[id] = {

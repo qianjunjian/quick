@@ -1,8 +1,11 @@
-import { ElMessageBox } from 'element-plus';
+import { ElMessageBox, ElNotification } from 'element-plus';
 import process from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import cmd from 'node-cmd';
+import { formatDateWithYear, formatDate } from '../utils/commonUtils';
+import { copy } from './copy';
+import { upload } from './sftp';
 
 const showError = err => {
     ElMessageBox.alert(err, '提示', {
@@ -44,10 +47,25 @@ export const buildProject = (project, store, callBack) => {
                 if (err) {
                   showError(err);
                 } else {
+                  let time = new Date();
+                  let _time = formatDate(time);
+                  time = formatDateWithYear(time);
+
+                  // 备份打包代码
+                  const distTemp = `/${project.projectName}/${project.projectName + '-' + time}`;
+                  copy(project.projectName, path.join(project.url, project.buildFile), distTemp);
+
                   if (callBack) {
-                    callBack(project);
+                    callBack(project, _time);
+                    return;
                   } else {
-                    // todo
+                    ElNotification({
+                      title: '打包成功',
+                      message: `${_time}  ${project.projectName}  打包成功！`,
+                      type: 'success',
+                      duration: 0,
+                      position: 'bottom-right'
+                    });
                   }
                 }
                 store.commit('setBuilding', {
@@ -64,10 +82,25 @@ export const buildProject = (project, store, callBack) => {
             if (err) {
               showError(err);
             } else {
+              let time = new Date();
+              let _time = formatDate(time);
+              time = formatDateWithYear(time);
+
+              // 备份打包代码
+              const distTemp = `/${project.projectName}/${project.projectName + '-' + time}`;
+              copy(project.projectName, path.join(project.url, project.buildFile), distTemp);
+
               if (callBack) {
-                callBack(project);
+                callBack(project, _time);
+                return;
               } else {
-                // todo
+                ElNotification({
+                  title: '打包成功',
+                  message: `${_time} ${project.projectName} 打包成功！`,
+                  type: 'success',
+                  duration: 0,
+                  position: 'bottom-right'
+                });
               }
             }
             store.commit('setBuilding', {
@@ -78,5 +111,47 @@ export const buildProject = (project, store, callBack) => {
         );
       }
     }
+  });
+};
+
+export const buildAndUploadProject = (project, store) => {
+  if (!project.remoteUrl) {
+    showError('请配置上传目录！');
+    return;
+  }
+  if (project.remoteUrl.indexOf('/usr/local/nginx/html')) {
+    showError('上传目录请配置在ngix目录下！【/usr/local/nginx/html/**】');
+    return;
+  }
+  buildProject(project, store, (project, _time) => {
+    store.commit('setBuilding', {
+      id: project.id,
+      type: 3
+    });
+    upload({
+      localStatic: path.join(project.url, project.buildFile), // 本地文件夹路径
+      remoteStatic: project.remoteUrl,
+      successCallBack: () => {
+        showSuccess(`【${project.projectName}】 上传成功!`);
+        ElNotification({
+          title: '打包并上传成功',
+          message: `${_time}  ${project.projectName}  打包成功！`,
+          type: 'success',
+          duration: 0,
+          position: 'bottom-right'
+        });
+        store.commit('setBuilding', {
+          id: project.id,
+          type: 1
+        });
+      },
+      errorCallBack: err => {
+        showError(err);
+        store.commit('setBuilding', {
+          id: project.id,
+          type: 1
+        });
+      }
+    });
   });
 };

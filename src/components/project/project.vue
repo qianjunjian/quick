@@ -1,13 +1,10 @@
 <template>
     <div id="project" @contextmenu.prevent="$emit('rightClick', $event)">
-        <div class="icon"><i :class="['iconfont', iconType]"></i></div>
+        <i :class="['iconfont', iconType]"></i>
         <div class="info">
             <div class="title">{{data.projectName}}</div>
             <template v-if="count > 0">
-                <div class="body">正在打包：</div>
-                <div class="footer">
-                    <el-progress :stroke-width="4" :percentage="count" :indeterminate="true" />
-                </div>
+                <div class="body progress-body">{{projectStatus === 2 ? "正在打包" : "正在上传"}}：<el-progress :stroke-width="4" :percentage="count" :indeterminate="true" /></div>
             </template>
             <template v-else>
                 <div class="body status-body">
@@ -35,6 +32,7 @@ export default {
         const store = useStore();
         const count = ref(0);
         const tabIndex = computed(() => store.state.leftTabIndex);
+        const projectStatus = computed(() => store.state.building[props.data.id]?.type);
         let timeout = null;
         watchEffect(async() => {
             const status = store.state.building[props.data.id]?.type;
@@ -44,6 +42,8 @@ export default {
                         count.value = count.value + 1;
                     }
                 }, 300);
+            } else if (status === 3) {
+                count.value = 1;
             } else {
                 if (status === 1 && count.value > 0) {
                     count.value = 100;
@@ -78,7 +78,8 @@ export default {
             tabIndex,
             iconSelected,
             iconType,
-            count
+            count,
+            projectStatus
         };
     }
 };
@@ -86,28 +87,16 @@ export default {
 
 <style scoped lang="less">
 #project {
-    padding-left: 12px;
-    padding-right: 12px;
-    height: 60px;
+    padding: 6px 10px;
     display: flex;
     border: 1px solid transparent;
     cursor: pointer;
 
-    .icon {
-        width: 50px;
-        height: 50px;
-        position: relative;
-        align-self: center;
-    }
-
     .icon-vue {
         color: #56b359;
-        font-size: 50px;
-        position: absolute;
-        left: 0;
-        top: -18px;
-        width: 50px;
-        height: 50px;
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
 
         &::before {
             background: #2e3031;
@@ -116,12 +105,9 @@ export default {
 
     .icon-React {
         color: #5adafd;
-        font-size: 50px;
-        position: absolute;
-        left: 0;
-        top: -18px;
-        width: 50px;
-        height: 50px;
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
 
         &::before {
             background: #2e3031;
@@ -130,12 +116,9 @@ export default {
 
     .icon-bold {
         color: #cc5c0c;
-        font-size: 50px;
-        position: absolute;
-        left: 0;
-        top: -18px;
-        width: 50px;
-        height: 50px;
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
 
         &::before {
             background: #2e3031;
@@ -145,34 +128,31 @@ export default {
     .status-body {
         display: flex;
         align-items: center;
-        line-height: unset !important;
+        line-height: 16px !important;
     }
 
     .icon-gantanhao {
         color: red;
         margin-right: 5px;
-        position: relative;
-        top: 3px;
     }
 
     .icon-medium {
         color: yellow;
-        position: relative;
-        top: 2px;
         margin-right: 5px;
     }
 
     .icon-duigouxuanzhong {
         color: green;
-        position: relative;
-        top: 2px;
     }
 
     .info {
         flex: 1;
         width: 0;
         margin-left: 10px;
-        padding: 5px 0;
+        padding: 2px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     &:hover {
@@ -183,10 +163,13 @@ export default {
         background-color: #094771;
         border: 1px solid #007fd4;
     }
-
+    .progress-body {
+        display: flex;
+        line-height: 16px;
+        color: #00e431;
+    }
     .title {
         font-size: 14px;
-        line-height: 17px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -194,10 +177,6 @@ export default {
 
     .body {
         font-size: 11px;
-        line-height: 17px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
     }
 
     .footer {
@@ -206,6 +185,10 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    :deep(.el-progress) {
+        width: calc(100% - 56px);
     }
 
     :deep(.el-progress__text) {

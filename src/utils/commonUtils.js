@@ -1,6 +1,7 @@
 import cmd from 'node-cmd';
 import path from 'path';
 import { existsSync, readFileSync } from 'fs';
+import dayjs from 'dayjs';
 
 const dirLst = [
     'src',
@@ -106,3 +107,12 @@ export const refreshProjectStatus = (workSpaces = [], commit) => {
         commit('setWorkspaces', workSpaces);
     }
 };
+
+export const formatDateWithYear = (time) => {
+    return dayjs(time).format('YYYY-MM-DD-HH-mm-ss');
+};
+
+export const formatDate = (time) => {
+    return dayjs(time).format('MM-DDTHH:mm:ss');
+};
+

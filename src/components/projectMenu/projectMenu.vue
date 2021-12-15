@@ -4,17 +4,17 @@
         <div class="menu-item" @click="openWidthVsCode($event)">使用vsCode打开</div>
         <div class="split-line"></div>
         <div class="menu-item" @click="buildHandle">打包</div>
-        <div class="menu-item">打包并上传</div>
+        <div class="menu-item" @click="buildAndUploadHandle">打包并上传</div>
         <div class="split-line"></div>
         <div class="menu-item" @click="editHandle">编辑</div>
-        <div class="menu-item">删除</div>
+        <div class="menu-item" @click="deleteHandle">删除</div>
     </div>
 </template>
 
 <script>
 import cmd from 'node-cmd';
 import { useStore } from 'vuex';
-import { buildProject } from '../../node/build';
+import { buildProject, buildAndUploadProject } from '../../node/build';
 
 export default {
     name: 'ProjectMenu',
@@ -51,8 +51,20 @@ export default {
             context.emit('close', e);
         };
         const buildHandle = e => {
-             const { data: project } = props;
+            const { data: project } = props;
             buildProject(project, store);
+            context.emit('close', e);
+        };
+        const deleteHandle = e => {
+            const { data: project } = props;
+            store.commit('deleteProject', {
+                ...project
+            });
+            context.emit('close', e);
+        };
+        const buildAndUploadHandle = e => {
+            const { data: project } = props;
+            buildAndUploadProject(project, store);
             context.emit('close', e);
         };
         return {
@@ -60,7 +72,9 @@ export default {
             openWidthVsCode,
             mousedownHandle,
             editHandle,
-            buildHandle
+            deleteHandle,
+            buildHandle,
+            buildAndUploadHandle
         };
     }
 };

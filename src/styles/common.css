@@ -372,3 +372,7 @@ body {
     border: 1px solid #3e3e3e;
     border-left: 0;
 }
+
+.el-collapse-item__content {
+    line-height: 1;
+}
