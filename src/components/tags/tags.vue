@@ -56,6 +56,7 @@ export default {
         color: #cccccc;
         position: relative;
         cursor: pointer;
+        white-space: nowrap;
 
         &:not(:first-child) {
             margin-left: 1px;

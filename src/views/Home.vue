@@ -5,7 +5,7 @@
         <Left></Left>
         <LeftBoard></LeftBoard>
         <div class="content">
-            <Tags></Tags>
+            <Tags v-show="showTags"></Tags>
             <Content></Content>
         </div>
         </div>
@@ -23,7 +23,7 @@ import Tags from '../components/tags/tags.vue';
 import db from '../database/datastore';
 import { initDB, refreshProjectStatus } from '../utils/commonUtils';
 import { useStore } from 'vuex';
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 
 export default {
     name: 'Home',
@@ -37,6 +37,7 @@ export default {
     },
     setup() {
         const store = useStore();
+        const showTags = computed(() => store.state.projectHistory && store.state.projectHistory.length > 0);
         // 初始化db
         initDB(db, store);
         onMounted(() => {
@@ -46,6 +47,10 @@ export default {
                 refreshProjectStatus(store.state.workSpaces, store.commit);
             }, 60000);
         });
+
+        return {
+            showTags
+        };
     }
 };
 </script>

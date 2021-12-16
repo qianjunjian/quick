@@ -119,7 +119,7 @@ export const buildAndUploadProject = (project, store) => {
     showError('请配置上传目录！');
     return;
   }
-  if (project.remoteUrl.indexOf('/usr/local/nginx/html')) {
+  if (project.remoteUrl.indexOf('nginx/html')) {
     showError('上传目录请配置在ngix目录下！【/usr/local/nginx/html/**】');
     return;
   }
@@ -135,7 +135,7 @@ export const buildAndUploadProject = (project, store) => {
         successCallBack: () => {
           ElNotification({
             title: '打包并上传成功',
-            message: `${_time}  ${project.projectName}  打包成功！`,
+            message: `${_time}  ${project.projectName}  打包并上传成功！`,
             type: 'success',
             duration: 0,
             position: 'bottom-right'

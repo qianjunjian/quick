@@ -93,7 +93,7 @@
 
 <script>
 import { useStore } from 'vuex';
-import { computed, reactive, watch, toRefs, ref } from 'vue';
+import { computed, reactive, watch, toRefs, ref, nextTick } from 'vue';
 import Project from '../project/project.vue';
 import ProjectMenu from '../projectMenu/projectMenu.vue';
 import { ipcRenderer } from 'electron';
@@ -201,6 +201,9 @@ export default {
                         ...data.form
                     });
                     closeHandle();
+                    nextTick(() => {
+                        refreshProjectStatus(store.state.workSpaces, store.commit);
+                    });
                 }
             });
         };
