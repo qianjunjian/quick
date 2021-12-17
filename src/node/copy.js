@@ -8,7 +8,7 @@ const APP = process.type === 'renderer' ? remote.app : app;
 // 获取electron应用的用户目录
 const STORE_PATH = APP.getPath('userData');
 
-const copyDist = path.join(STORE_PATH, '/appDistTemp');
+export const copyDist = path.join(STORE_PATH, '/appDistTemp');
 
 if (!fs.pathExistsSync(copyDist)) {
     fs.mkdirpSync(copyDist);
@@ -49,4 +49,36 @@ const spliceFile = (projectName) => {
             fs.rmdir(delPath, {recursive: true});
         });
     }
+};
+
+// 只保存前最新的5个
+export const getProjectHistory = (projectName) => {
+    let lst = [];
+    if (projectName) {
+        const projectPath = path.join(copyDist, projectName);
+        if (fs.pathExistsSync(projectPath)) {
+            lst = fs.readdirSync(projectPath);
+        }
+    }
+    lst = lst.map(item => {
+        const ary = item.split('-');
+        return {
+            fullName: item,
+            shortName: ary[0],
+            date: `${ary[1]}-${ary[2]}-${ary[3]}`,
+            time: `${ary[4]}:${ary[5]}:${ary[6]}`
+        };
+    });
+    return lst || [];
+};
+
+export const getPath = (projectName, name) => {
+    return path.join(copyDist, projectName, name);
+};
+
+// 删除指定文件
+export const deleteFile = (projectName, fullName) => {
+    const projectPath = path.join(copyDist, projectName);
+    const delPath = path.join(projectPath, fullName);
+    fs.rmdirSync(delPath, {recursive: true});
 };

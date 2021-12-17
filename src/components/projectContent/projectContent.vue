@@ -1,7 +1,7 @@
 <template>
     <div id="projectContent">
         <div class="header">
-            <div class="icon"><i class="iconfont icon-React"></i></div>
+            <div class="icon"><i :class="['icon', 'iconfont', projectDetail?.iconType === 'vue' ? 'icon-vue ' : projectDetail?.iconType === 'backbone' ? 'icon-bold' : 'icon-React']"></i></div>
             <div class="info">
                 <div class="name">
                     <span>{{projectDetail?.projectName}}</span>
@@ -24,9 +24,10 @@
         </div>
         <div class="body">
             <el-tabs>
-                <el-tab-pane label="通知" name="first">User</el-tab-pane>
-                <el-tab-pane label="打包记录" name="second">打包记录</el-tab-pane>
-                <el-tab-pane label="提交记录" name="third">提交记录</el-tab-pane>
+                <el-tab-pane label="打包记录" name="one">
+                    <ProjectHistory :project="projectDetail" />
+                </el-tab-pane>
+                <el-tab-pane label="提交记录" name="two">提交记录</el-tab-pane>
             </el-tabs>
         </div>
     </div>
@@ -34,12 +35,17 @@
 
 <script>
 import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import ProjectHistory from '../projectHistory/projectHistory.vue';
 
 export default {
     name: 'ProjectContent',
+    components: {
+        ProjectHistory
+    },
     setup() {
         const store = useStore();
+        const rate = ref(5);
         const projectDetail = computed(() => {
             const workSpaces = store.state.workSpaces;
             const id = store.state.activeProjectId;
@@ -60,7 +66,8 @@ export default {
             return project;
         });
         return {
-            projectDetail
+            projectDetail,
+            rate
         };
     }
 };
@@ -69,6 +76,7 @@ export default {
 <style scoped lang="less">
 #projectContent {
     max-width: 1000px;
+    min-width: 500px;
     padding: 20px 10px 20px;
     margin: 0 auto;
 
@@ -84,6 +92,16 @@ export default {
 
         .icon-React {
             color: #5adafd;
+            font-size: 130px;
+        }
+
+        .icon-bold {
+            color: #cc5c0c;
+            font-size: 130px;
+        }
+
+        .icon-vue {
+            color: #56b359;
             font-size: 130px;
         }
 

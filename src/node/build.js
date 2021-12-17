@@ -158,3 +158,46 @@ export const buildAndUploadProject = (project, store) => {
     }, 100);
   });
 };
+
+export const uploadProject = (project, store, path, fullName) => {
+  if (!project.remoteUrl) {
+    showError('请配置上传目录！');
+    return;
+  }
+  if (project.remoteUrl.indexOf('nginx/html') < 0) {
+    showError('上传目录请配置在ngix目录下！【/usr/local/nginx/html/**】');
+    return;
+  }
+  store.commit('setBuilding', {
+    id: project.id,
+    type: 3
+  });
+  const timeout = setTimeout(() => {
+    upload({
+      localStatic: path, // 本地文件夹路径
+      remoteStatic: project.remoteUrl,
+      successCallBack: () => {
+        ElNotification({
+          title: '上传成功',
+          message: `${fullName} 上传成功！`,
+          type: 'success',
+          duration: 0,
+          position: 'bottom-right'
+        });
+        store.commit('setBuilding', {
+          id: project.id,
+          type: 1
+        });
+        timeout && clearTimeout(timeout);
+      },
+      errorCallBack: err => {
+        showError(err);
+        store.commit('setBuilding', {
+          id: project.id,
+          type: 1
+        });
+        timeout && clearTimeout(timeout);
+      }
+    });
+  }, 100);
+};

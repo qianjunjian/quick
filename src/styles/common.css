@@ -376,3 +376,26 @@ body {
 .el-collapse-item__content {
     line-height: 1;
 }
+
+.el-table th, .el-table tr, .el-table, .el-table__expanded-cell {
+    background-color: transparent;
+}
+
+.el-table tbody tr:hover>td { 
+    background-color:#094771 !important
+}
+
+.el-table .cell {
+    color: #cccccc;
+}
+
+.el-table td, .el-table th.is-leaf {
+    border-bottom: 1px solid #424344;
+}
+
+.el-table--border::after, .el-table--group::after, .el-table::before {
+    content: "";
+    position: absolute;
+    background-color: transparent !important;
+    z-index: 1;
+}
