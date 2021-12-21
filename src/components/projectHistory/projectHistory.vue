@@ -24,10 +24,11 @@
 
 <script>
 import { useStore } from 'vuex';
-import { watch, reactive, watchEffect} from 'vue';
+import { watch, reactive, watchEffect } from 'vue';
 import { getProjectHistory } from '../../node/copy';
 import { uploadProject } from '../../node/build';
 import { getPath, deleteFile } from '../../node/copy';
+import { ElNotification } from 'element-plus';
 
 export default {
     name: 'ProjectHistory',
@@ -40,20 +41,29 @@ export default {
         watchEffect(() => {
             const status = store.state.building[props.project?.id]?.type;
             if (status === 1) {
-                console.log('>>>>>>>>>>>>>>>1');
                 projectHistory.splice(0, projectHistory.length);
                 projectHistory.push(...getProjectHistory(props.project.projectName));
             }
         });
         watch(() => props.project, (newProject, oldProject) => {
             if (newProject?.projectName !== oldProject?.projectName) {
-                console.log('>>>>>>>>>>>>>>>2');
                 projectHistory.splice(0, projectHistory.length);
                 projectHistory.push(...getProjectHistory(newProject.projectName));
             }
         });
 
         const handleEdit = (index) => {
+            const status = store.state.building[props.project?.id]?.type;
+            if (status !== 1 && status !== undefined) {
+                ElNotification({
+                    title: '提示',
+                    message: '正在打包或上传，请稍后',
+                    type: 'warning',
+                    duration: 2000,
+                    position: 'top-right'
+                });
+                return;
+            }
             uploadProject(props.project, store, getPath(props.project.projectName, projectHistory[index].fullName), projectHistory[index].fullName);
         };
 
@@ -62,6 +72,7 @@ export default {
             projectHistory.splice(0, projectHistory.length);
             projectHistory.push(...getProjectHistory(props.project.projectName));
         };
+
         return {
             projectHistory,
             handleEdit,

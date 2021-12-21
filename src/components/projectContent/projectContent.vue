@@ -23,11 +23,13 @@
             </div>
         </div>
         <div class="body">
-            <el-tabs>
+            <el-tabs v-model="activeName" @tab-click="handleClick">
                 <el-tab-pane label="打包记录" name="one">
                     <ProjectHistory :project="projectDetail" />
                 </el-tab-pane>
-                <el-tab-pane label="提交记录" name="two">提交记录</el-tab-pane>
+                <el-tab-pane label="提交记录" name="two">
+                    <ProjectLog :project="projectDetail" />
+                </el-tab-pane>
             </el-tabs>
         </div>
     </div>
@@ -37,15 +39,18 @@
 import { useStore } from 'vuex';
 import { computed, ref } from 'vue';
 import ProjectHistory from '../projectHistory/projectHistory.vue';
+import ProjectLog from '../projectLog/projectLog.vue';
 
 export default {
     name: 'ProjectContent',
     components: {
-        ProjectHistory
+        ProjectHistory,
+        ProjectLog
     },
     setup() {
         const store = useStore();
         const rate = ref(5);
+        const activeName = ref('one');
         const projectDetail = computed(() => {
             const workSpaces = store.state.workSpaces;
             const id = store.state.activeProjectId;
@@ -65,9 +70,14 @@ export default {
             }
             return project;
         });
+        const handleClick = (tab) => {
+            console.log(tab, event);
+        };
         return {
             projectDetail,
-            rate
+            rate,
+            activeName,
+            handleClick
         };
     }
 };
