@@ -9,6 +9,7 @@ const config = {
   password: 'linkage@12345'
 };
 
+const instance = sftp.connect(config);
 /**
  * 上传文件到sftp
  * @param { Object } config    sftp 链接配置参数
@@ -24,7 +25,7 @@ const config = {
  * @param { String } remoteFile // 服务器html页面
  */
 export function upload(options) {
-  sftp.connect(config).then(() => {
+  instance.then(() => {
     console.log('文件上传中');
     return sftp.exists(options.remoteStatic + '/app');
   }).then((data) => {
@@ -69,11 +70,11 @@ export function upload(options) {
     return sftp.uploadDir(options.localStatic, options.remoteStatic);
   }).then(() => {
     console.log('文件上传成功');
-    sftp.end();
+    // sftp.end();
     options.successCallBack && options.successCallBack();
   }).catch((err) => {
     console.log('上传失败', err);
-    sftp.end();
+    // sftp.end();
     options.errorCallBack && options.errorCallBack(err);
   });
 }

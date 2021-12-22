@@ -5,6 +5,7 @@
             <div class="menus">
                 <div :class="['title-bar', 'no-drag', showFilesMenusPannel ? 'active' : '']" @click="showFilesMenus">File</div>
             </div>
+            <div class="version">v2.0.0-beta.内测版</div>
             <div class="btns">
                 <span class="header-icon el-icon-minus no-drag" @click="minimizeWin"></span>
                 <span class="header-icon el-icon-full-screen no-drag" @click="maximizeWin"></span>
@@ -140,6 +141,12 @@ export default {
         background-repeat: no-repeat;
         background-size: 80px 24px;
         margin-right: 20px;
+    }
+
+    .version {
+        font-size: 12px;
+        position: relative;
+        top: 5px;
     }
 
     .title-bar {

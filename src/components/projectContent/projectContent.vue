@@ -16,9 +16,9 @@
                     <el-rate v-model="rate" allow-half />
                 </div>
                 <div class="buttons">
-                    <div class="btn"><i class="btn-icon el-icon-edit"></i>编辑</div>
-                    <div class="btn"><i class="btn-icon el-icon-lightning"></i>打包</div>
-                    <div class="btn"><i class="btn-icon el-icon-upload"></i>打包并上传</div>
+                    <div class="btn" @click="editHandle"><i class="btn-icon el-icon-edit"></i>编辑</div>
+                    <div class="btn" @click="buildHandle"><i class="btn-icon el-icon-lightning"></i>打包</div>
+                    <div class="btn" @click="buildAndUploadHandle"><i class="btn-icon el-icon-upload"></i>打包并上传</div>
                 </div>
             </div>
         </div>
@@ -40,6 +40,7 @@ import { useStore } from 'vuex';
 import { computed, ref } from 'vue';
 import ProjectHistory from '../projectHistory/projectHistory.vue';
 import ProjectLog from '../projectLog/projectLog.vue';
+import { buildProject, buildAndUploadProject } from '../../node/build';
 
 export default {
     name: 'ProjectContent',
@@ -73,11 +74,29 @@ export default {
         const handleClick = (tab) => {
             console.log(tab, event);
         };
+        const editHandle = () => {
+            store.commit('setShowAddProject', {
+                showAddProject: true,
+                showAddProjectData: {
+                    ...projectDetail,
+                    type: 2
+                }
+            });
+        };
+        const buildHandle = () => {
+            buildProject(projectDetail, store);
+        };
+        const buildAndUploadHandle = () => {
+            buildAndUploadProject(projectDetail, store);
+        };
         return {
             projectDetail,
             rate,
             activeName,
-            handleClick
+            handleClick,
+            editHandle,
+            buildHandle,
+            buildAndUploadHandle
         };
     }
 };
