@@ -84,10 +84,10 @@ export default {
             });
         };
         const buildHandle = () => {
-            buildProject(projectDetail, store);
+            buildProject({...projectDetail}, store);
         };
         const buildAndUploadHandle = () => {
-            buildAndUploadProject(projectDetail, store);
+            buildAndUploadProject({...projectDetail}, store);
         };
         return {
             projectDetail,

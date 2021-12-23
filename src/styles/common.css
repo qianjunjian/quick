@@ -399,3 +399,6 @@ body {
     background-color: transparent !important;
     z-index: 1;
 }
+.el-notification .el-icon-success {
+    color: var(--el-color-success) !important;
+}
