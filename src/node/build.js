@@ -119,7 +119,7 @@ export const buildAndUploadProject = (project, store) => {
     showError('请配置上传目录！');
     return;
   }
-  if (project.remoteUrl.indexOf('nginx/html')) {
+  if (project.remoteUrl.indexOf('nginx/html') < 0) {
     showError('上传目录请配置在ngix目录下！【/usr/local/nginx/html/**】');
     return;
   }
