@@ -78,16 +78,16 @@ export default {
             store.commit('setShowAddProject', {
                 showAddProject: true,
                 showAddProjectData: {
-                    ...projectDetail,
+                    ...projectDetail.value,
                     type: 2
                 }
             });
         };
         const buildHandle = () => {
-            buildProject({...projectDetail}, store);
+            buildProject(projectDetail.value, store);
         };
         const buildAndUploadHandle = () => {
-            buildAndUploadProject({...projectDetail}, store);
+            buildAndUploadProject(projectDetail.value, store);
         };
         return {
             projectDetail,
